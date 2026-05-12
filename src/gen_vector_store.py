@@ -92,5 +92,17 @@ else:
 embeddings = OpenAIEmbeddings()
 vectordb = Chroma(embedding_function=embeddings, 
                   persist_directory=vector_persist_dir)
+
+# Get existing document IDs to avoid duplicates
+existing_data = vectordb.get()
+existing_ids = set(existing_data['ids']) if existing_data['ids'] else set()
+
+# Add documents one at a time, checking for duplicates
 for doc in tqdm(docs_list):
-    vectordb.add_documents([doc])
+    # Create a unique ID based on source and page
+    doc_id = f"{doc.metadata['source']}_{doc.metadata.get('page', 0)}"
+    
+    # Only add if not already in database
+    if doc_id not in existing_ids:
+        vectordb.add_documents([doc], ids=[doc_id])
+        existing_ids.add(doc_id)
