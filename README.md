@@ -107,6 +107,8 @@ $env:OPENAI_API_KEY='your-api-key-here'
    - Extract text and create document chunks
    - Generate embeddings using OpenAI
    - Store the vector database in the specified directory
+   
+   **Adding New Documents**: To add new PDFs to your existing vector store, simply place them in your `docs_path` directory and run `gen_vector_store.py` again. The script will process the new documents and add their embeddings to the existing vector store.
 
 3. **Launch the chatbot**: Start the Streamlit app:
    ```bash
