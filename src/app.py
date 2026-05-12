@@ -13,7 +13,9 @@ from rag_llm import run_query, return_vectordb
 ############################################################
 # Get Vector Database 
 ############################################################
+print("Initializing RAG-GPT application...")
 vectordb = return_vectordb()
+print("Application ready!")
 
 ############################################################
 # Run Chat

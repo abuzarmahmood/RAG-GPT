@@ -70,9 +70,11 @@ def try_load(this_path):
 
 
 if not os.path.exists(docs_output_path):
+    print(f"Loading {len(file_list)} PDF files...")
     docs_list = parallelize(file_list, try_load, num_of_processes=24)
     # Drop None
     docs_list = [doc for doc in docs_list if doc is not None]
+    print(f"Processing documents...")
     # Flatten list
     docs_list = [item for sublist in docs_list for item in sublist]
     # Extract document source from each document
@@ -89,15 +91,19 @@ else:
 # Generate Embeddings
 ############################################################
 
+print("Initializing embeddings and vector database...")
 embeddings = OpenAIEmbeddings()
 vectordb = Chroma(embedding_function=embeddings, 
                   persist_directory=vector_persist_dir)
 
 # Get existing document IDs to avoid duplicates
+print("Checking for existing documents in vector database...")
 existing_data = vectordb.get()
 existing_ids = set(existing_data['ids']) if existing_data['ids'] else set()
+print(f"Found {len(existing_ids)} existing documents in database")
 
 # Add documents one at a time, checking for duplicates
+print(f"Adding documents to vector database (skipping duplicates)...")
 for doc in tqdm(docs_list):
     # Create a unique ID based on source and page
     doc_id = f"{doc.metadata['source']}_{doc.metadata.get('page', 0)}"

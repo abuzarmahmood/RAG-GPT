@@ -32,11 +32,13 @@ def return_vectordb():
     Returns:
         vectordb: vector database
     """
+    print("Loading vector database...")
     _, _, _, vector_persist_dir = return_paths()
     embeddings = OpenAIEmbeddings()
     vectordb = Chroma(persist_directory=vector_persist_dir,
                       embedding_function=embeddings,
                       collection_metadata={"hnsw:space": "cosine"})
+    print("Vector database loaded successfully")
     return vectordb
 
 
@@ -81,6 +83,7 @@ def run_query(
     Returns:
         out_str: string of answer
     """
+    print(f"Searching for relevant documents (k={k})...")
     outs = vectordb.similarity_search_with_relevance_scores(query, k=k)
     docs, scores = zip(*outs)
 
@@ -91,6 +94,7 @@ def run_query(
     =========
     Answer in Markdown:"""
 
+    print(f"Generating response using {load_config()['model_name']}...")
     config = load_config()
     completion = client.chat.completions.create(model=config['model_name'],
     messages=[
