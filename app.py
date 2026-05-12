@@ -32,7 +32,7 @@ MESSAGES = "messages"
 if MESSAGES not in st.session_state:
     st.session_state[MESSAGES] = [Message(
         actor=ASSISTANT,
-        payload="Welcome to KatzGPT! I'm an AI assistant for answering questions about systems neuroscience, specifically taste processing. Ask me a question about taste processing and I'll try to answer it.")]
+        payload="Welcome to RAG-GPT! I'm an AI assistant for answering questions about systems neuroscience, specifically taste processing. Ask me a question about taste processing and I'll try to answer it.")]
 
 msg: Message
 for msg in st.session_state[MESSAGES]:

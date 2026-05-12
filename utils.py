@@ -12,8 +12,8 @@ def return_paths():
     """
     docs_path = '/media/bigdata/projects/istyar/data/abu_zotero'
     file_list = glob(os.path.join(docs_path, "*"))
-    vector_persist_dir = '/media/bigdata/projects/katzGPT/vector_store'
-    docs_output_dir = '/media/bigdata/projects/katzGPT/docs'
+    vector_persist_dir = '/media/bigdata/projects/RAG-GPT/vector_store'
+    docs_output_dir = '/media/bigdata/projects/RAG-GPT/docs'
     docs_output_path = os.path.join(docs_output_dir, 'docs.pkl')
     return file_list, docs_output_path, docs_output_dir, vector_persist_dir
 
