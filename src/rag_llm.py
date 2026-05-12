@@ -14,7 +14,9 @@ from utils import return_paths
 
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 
 ############################################################
 # Define Functions 
@@ -89,13 +91,11 @@ def run_query(
     =========
     Answer in Markdown:"""
 
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-1106",
-        messages=[
-            {"role": "system", "content": "You are an AI assistant for answering questions about systems neuroscience, specifically taste processing. You are given the following extracted parts of a long document and a question. Provide a conversational answer. Always indicate your sources"},
-            {"role": "user", "content": prompt}
-        ],
-    )
+    completion = client.chat.completions.create(model="gpt-3.5-turbo-1106",
+    messages=[
+        {"role": "system", "content": "You are an AI assistant for answering questions about systems neuroscience, specifically taste processing. You are given the following extracted parts of a long document and a question. Provide a conversational answer. Always indicate your sources"},
+        {"role": "user", "content": prompt}
+    ])
 
     out_str = completion.choices[0].message.content
     docs_str = get_docs(query, vectordb, k=k)
