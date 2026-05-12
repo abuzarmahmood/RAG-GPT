@@ -10,6 +10,7 @@ import os
 from tqdm import tqdm
 from pickle import dump, load
 import numpy as np
+from datetime import datetime
 from utils import return_paths, load_config
 
 from langchain_openai import OpenAIEmbeddings
@@ -32,13 +33,13 @@ def return_vectordb():
     Returns:
         vectordb: vector database
     """
-    print("Loading vector database...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading vector database...")
     _, _, _, vector_persist_dir = return_paths()
     embeddings = OpenAIEmbeddings()
     vectordb = Chroma(persist_directory=vector_persist_dir,
                       embedding_function=embeddings,
                       collection_metadata={"hnsw:space": "cosine"})
-    print("Vector database loaded successfully")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector database loaded successfully")
     return vectordb
 
 
@@ -98,7 +99,7 @@ def run_query(
     if model_name is None:
         model_name = load_config()['model_name']
     
-    print(f"Searching for relevant documents (k={k})...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Searching for relevant documents (k={k})...")
     outs = vectordb.similarity_search_with_relevance_scores(query, k=k)
     docs, scores = zip(*outs)
 
@@ -109,7 +110,7 @@ def run_query(
     =========
     Answer in Markdown:"""
 
-    print(f"Generating response using {model_name}...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Generating response using {model_name}...")
     completion = client.chat.completions.create(model=model_name,
     messages=[
         {"role": "system", "content": system_context},

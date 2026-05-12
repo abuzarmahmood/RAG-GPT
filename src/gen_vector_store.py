@@ -12,6 +12,7 @@ import os
 from tqdm import tqdm
 from joblib import Parallel, delayed 
 from pickle import dump, load
+from datetime import datetime
 from utils import return_paths
 
 # from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
@@ -54,7 +55,7 @@ def try_load(this_path):
         docs = loader.load()
         return docs
     except:
-        print(f'Load failed : {this_path}')
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Load failed : {this_path}")
         return None
 
 ############################################################
@@ -93,19 +94,19 @@ else:
 # Generate Embeddings
 ############################################################
 
-print("Initializing embeddings and vector database...")
+print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Initializing embeddings and vector database...")
 embeddings = OpenAIEmbeddings()
 vectordb = Chroma(embedding_function=embeddings, 
                   persist_directory=vector_persist_dir)
 
 # Get existing document IDs to avoid duplicates
-print("Checking for existing documents in vector database...")
+print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking for existing documents in vector database...")
 existing_data = vectordb.get()
 existing_ids = set(existing_data['ids']) if existing_data['ids'] else set()
-print(f"Found {len(existing_ids)} existing documents in database")
+print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(existing_ids)} existing documents in database")
 
 # Add documents one at a time, checking for duplicates
-print(f"Adding documents to vector database (skipping duplicates)...")
+print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Adding documents to vector database (skipping duplicates)...")
 for doc in tqdm(docs_list):
     # Create a unique ID based on source and page
     doc_id = f"{doc.metadata['source']}_{doc.metadata.get('page', 0)}"

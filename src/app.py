@@ -13,9 +13,10 @@ from rag_llm import run_query, return_vectordb
 ############################################################
 # Get Vector Database 
 ############################################################
-print("Initializing RAG-GPT application...")
+from datetime import datetime
+print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Initializing RAG-GPT application...")
 vectordb = return_vectordb()
-print("Application ready!")
+print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Application ready!")
 
 ############################################################
 # Run Chat
