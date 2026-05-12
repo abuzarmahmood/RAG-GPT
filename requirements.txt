@@ -6,3 +6,7 @@ pypdf
 tqdm
 joblib
 numpy
+langchain-community 
+pypdf
+langchain-openai
+langchain-chroma

@@ -14,9 +14,12 @@ from joblib import Parallel, delayed
 from pickle import dump, load
 from utils import return_paths
 
-from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
-from langchain.embeddings import OpenAIEmbeddings 
-from langchain.vectorstores import Chroma 
+# from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
+# from langchain.embeddings import OpenAIEmbeddings 
+from langchain_openai import OpenAIEmbeddings
+# from langchain.vectorstores import Chroma 
+from langchain_chroma import Chroma
 
 ############################################################
 ## Convenience Functions 
@@ -89,6 +92,6 @@ else:
 embeddings = OpenAIEmbeddings()
 vectordb = Chroma.from_documents([docs_list[0]], embedding=embeddings, 
                               persist_directory=vector_persist_dir)
-vectordb.persist()
+# vectordb.persist()
 for doc in tqdm(docs_list):
     vectordb.add_documents([doc])

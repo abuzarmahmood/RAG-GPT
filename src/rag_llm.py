@@ -10,10 +10,10 @@ import os
 from tqdm import tqdm
 from pickle import dump, load
 import numpy as np
-from src.utils import return_paths
+from utils import return_paths
 
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain_chroma import Chroma
 import openai
 
 ############################################################
