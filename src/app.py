@@ -31,6 +31,18 @@ st.sidebar.title("Configuration")
 st.sidebar.info(f"**Model:** {config.get('model_name', 'Not specified')}")
 st.sidebar.info(f"**Documents Retrieved (k):** {config.get('k', 5)}")
 
+# Add editable system context
+st.sidebar.subheader("System Context")
+if "system_context" not in st.session_state:
+    st.session_state["system_context"] = config['system_context']
+
+st.session_state["system_context"] = st.sidebar.text_area(
+    "Edit system context:",
+    value=st.session_state["system_context"],
+    height=150,
+    help="Modify the system context to change how the AI assistant behaves"
+)
+
 @dataclass
 class Message:
     actor: str
@@ -56,7 +68,7 @@ if prompt:
     st.session_state[MESSAGES].append(Message(actor=USER, payload=prompt))
     st.chat_message(USER).write(prompt)
     # response: str = f"You wrote {prompt}"
-    response: str = run_query(prompt, vectordb)
+    response: str = run_query(prompt, vectordb, system_context=st.session_state["system_context"])
     st.session_state[MESSAGES].append(
         Message(actor=ASSISTANT, payload=response))
     st.chat_message(ASSISTANT).write(response)
