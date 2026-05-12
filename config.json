@@ -1,5 +1,5 @@
 {
-    "docs_path": "/path/to/your/pdf/documents",
-    "vector_persist_dir": "/path/to/vector/store",
-    "docs_output_dir": "/path/to/docs/output"
+    "docs_path": "/home/abuzarmahmood/projects/RAG-GPT/docs",
+    "vector_persist_dir": "/home/abuzarmahmood/projects/RAG-GPT/vector_store",
+    "docs_output_dir": "/home/abuzarmahmood/projects/RAG-GPT/docs_output"
 }
