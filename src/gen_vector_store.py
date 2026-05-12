@@ -90,8 +90,7 @@ else:
 ############################################################
 
 embeddings = OpenAIEmbeddings()
-vectordb = Chroma.from_documents([docs_list[0]], embedding=embeddings, 
-                              persist_directory=vector_persist_dir)
-# vectordb.persist()
+vectordb = Chroma(embedding_function=embeddings, 
+                  persist_directory=vector_persist_dir)
 for doc in tqdm(docs_list):
     vectordb.add_documents([doc])
