@@ -22,6 +22,12 @@ vectordb = return_vectordb()
 
 from utils import load_config
 
+config = load_config()
+
+# Display model information in sidebar
+st.sidebar.title("Configuration")
+st.sidebar.info(f"**Model:** {config.get('model', 'Not specified')}")
+
 @dataclass
 class Message:
     actor: str
@@ -32,7 +38,6 @@ USER = "user"
 ASSISTANT = "ai"
 MESSAGES = "messages"
 if MESSAGES not in st.session_state:
-    config = load_config()
     welcome_message = f"Welcome to RAG-GPT! {config['system_context'].split('.')[0]}. Ask me a question about taste processing and I'll try to answer it."
     st.session_state[MESSAGES] = [Message(
         actor=ASSISTANT,
