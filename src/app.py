@@ -26,7 +26,7 @@ config = load_config()
 
 # Display model information in sidebar
 st.sidebar.title("Configuration")
-st.sidebar.info(f"**Model:** {config.get('model', 'Not specified')}")
+st.sidebar.info(f"**Model:** {config.get('model_name', 'Not specified')}")
 
 @dataclass
 class Message:
