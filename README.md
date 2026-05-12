@@ -93,6 +93,15 @@ $env:OPENAI_API_KEY='your-api-key-here'
    ```bash
    python src/gen_vector_store.py
    ```
+   
+   > **⚠️ WARNING:** Document processing can take a significant amount of time, especially for large document collections. Expect processing times on the order of **hours** depending on:
+   > - The number of PDF files
+   > - The size of each PDF
+   > - Your OpenAI API rate limits
+   > - Your internet connection speed
+   >
+   > The script will save progress to `docs.pkl`, so if interrupted, it can resume from the document loading stage. However, embedding generation must complete in one run.
+   
    This will:
    - Load all PDFs from your documents directory
    - Extract text and create document chunks
