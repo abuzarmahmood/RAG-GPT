@@ -82,9 +82,11 @@ if not os.path.exists(docs_output_path):
     ## Count length of set of document source
     #len(set(doc_source))
     # Save docs
+    print(f"Saving {len(docs_list)} documents to {docs_output_path}...")
     with open(docs_output_path, 'wb') as f:
         dump(docs_list, f)
 else:
+    print(f"Loading existing documents from {docs_output_path}...")
     docs_list = load(open(docs_output_path, 'rb')) 
 
 ############################################################
