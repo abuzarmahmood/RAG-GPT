@@ -7,19 +7,59 @@ Currently, KatzGPT is deployed as a Streamlit Chatbot App.
 
 Below are a couple examples of KatzGPT in action. 
 
-## Quickstart
+## Installation
 
 ### Prerequisites
 
-1. Set up your OpenAI API key as an environment variable:
-   ```bash
-   export OPENAI_API_KEY='your-api-key-here'
-   ```
+- Python 3.8 or higher
+- An OpenAI API key (get one at https://platform.openai.com/api-keys)
 
-2. Install required dependencies:
-   ```bash
-   pip install streamlit langchain openai chromadb pypdf tqdm joblib
-   ```
+### Step 1: Clone the Repository
+
+```bash
+git clone <repository-url>
+cd RAG-GPT
+```
+
+### Step 2: Set Up Virtual Environment (Recommended)
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+### Step 3: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Alternatively, install packages individually:
+```bash
+pip install streamlit langchain openai chromadb pypdf tqdm joblib numpy
+```
+
+### Step 4: Configure OpenAI API Key
+
+Set up your OpenAI API key as an environment variable:
+
+```bash
+export OPENAI_API_KEY='your-api-key-here'
+```
+
+On Windows (Command Prompt):
+```cmd
+set OPENAI_API_KEY=your-api-key-here
+```
+
+On Windows (PowerShell):
+```powershell
+$env:OPENAI_API_KEY='your-api-key-here'
+```
+
+**Note:** For persistent configuration, add the export command to your `~/.bashrc` or `~/.zshrc` file (Linux/Mac) or set it as a system environment variable (Windows).
+
+## Quickstart
 
 ### Setup
 
