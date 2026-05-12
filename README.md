@@ -5,7 +5,7 @@ It is intended to be used both as a summarizer and synthesizer of knowledge as w
 
 Currently, RAG-GPT is deployed as a Streamlit Chatbot App.
 
-The Examples section illustrates outputs of RAG-GPT. 
+The [Examples](#examples) section illustrates outputs of RAG-GPT. 
 
 ## Installation
 
