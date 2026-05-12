@@ -7,14 +7,21 @@ import json
 from glob import glob
 
 
+def load_config():
+    """
+    Load configuration from config.json.
+    """
+    config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+    return config
+
+
 def return_paths():
     """
     Return paths for the project.
     """
-    # Load configuration from config.json
-    config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
-    with open(config_path, 'r') as f:
-        config = json.load(f)
+    config = load_config()
     
     docs_path = config['docs_path']
     file_list = glob(os.path.join(docs_path, "*"))

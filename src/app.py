@@ -20,6 +20,8 @@ vectordb = return_vectordb()
 ############################################################
 
 
+from utils import load_config
+
 @dataclass
 class Message:
     actor: str
@@ -30,9 +32,11 @@ USER = "user"
 ASSISTANT = "ai"
 MESSAGES = "messages"
 if MESSAGES not in st.session_state:
+    config = load_config()
+    welcome_message = f"Welcome to RAG-GPT! {config['system_context'].split('.')[0]}. Ask me a question about taste processing and I'll try to answer it."
     st.session_state[MESSAGES] = [Message(
         actor=ASSISTANT,
-        payload="Welcome to RAG-GPT! I'm an AI assistant for answering questions about systems neuroscience, specifically taste processing. Ask me a question about taste processing and I'll try to answer it.")]
+        payload=welcome_message)]
 
 msg: Message
 for msg in st.session_state[MESSAGES]:

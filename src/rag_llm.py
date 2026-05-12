@@ -10,7 +10,7 @@ import os
 from tqdm import tqdm
 from pickle import dump, load
 import numpy as np
-from utils import return_paths
+from utils import return_paths, load_config
 
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
@@ -91,9 +91,10 @@ def run_query(
     =========
     Answer in Markdown:"""
 
-    completion = client.chat.completions.create(model="gpt-3.5-turbo-1106",
+    config = load_config()
+    completion = client.chat.completions.create(model=config['model_name'],
     messages=[
-        {"role": "system", "content": "You are an AI assistant for answering questions about systems neuroscience, specifically taste processing. You are given the following extracted parts of a long document and a question. Provide a conversational answer. Always indicate your sources"},
+        {"role": "system", "content": config['system_context']},
         {"role": "user", "content": prompt}
     ])
 
