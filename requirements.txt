@@ -1,0 +1,8 @@
+streamlit
+langchain
+openai
+chromadb
+pypdf
+tqdm
+joblib
+numpy
