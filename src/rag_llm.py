@@ -74,7 +74,8 @@ def run_query(
         query,
         vectordb,
         k=None,
-        system_context=None
+        system_context=None,
+        model_name=None
 ):
     """
     Run a query and return the answer.
@@ -83,6 +84,7 @@ def run_query(
         query: query string
         k: number of documents to return (defaults to config value)
         system_context: system context string (defaults to config value)
+        model_name: model name string (defaults to config value)
 
     Returns:
         out_str: string of answer
@@ -92,6 +94,9 @@ def run_query(
     
     if system_context is None:
         system_context = load_config()['system_context']
+    
+    if model_name is None:
+        model_name = load_config()['model_name']
     
     print(f"Searching for relevant documents (k={k})...")
     outs = vectordb.similarity_search_with_relevance_scores(query, k=k)
@@ -104,9 +109,8 @@ def run_query(
     =========
     Answer in Markdown:"""
 
-    print(f"Generating response using {load_config()['model_name']}...")
-    config = load_config()
-    completion = client.chat.completions.create(model=config['model_name'],
+    print(f"Generating response using {model_name}...")
+    completion = client.chat.completions.create(model=model_name,
     messages=[
         {"role": "system", "content": system_context},
         {"role": "user", "content": prompt}

@@ -28,8 +28,29 @@ config = load_config()
 
 # Display model information in sidebar
 st.sidebar.title("Configuration")
-st.sidebar.info(f"**Model:** {config.get('model_name', 'Not specified')}")
-st.sidebar.info(f"**Documents Retrieved (k):** {config.get('k', 5)}")
+
+# Add editable model name
+st.sidebar.subheader("Model Settings")
+if "model_name" not in st.session_state:
+    st.session_state["model_name"] = config.get('model_name', 'gpt-4o-mini')
+
+st.session_state["model_name"] = st.sidebar.text_input(
+    "Model name:",
+    value=st.session_state["model_name"],
+    help="Specify the OpenAI model to use (e.g., gpt-4o-mini, gpt-4, gpt-3.5-turbo)"
+)
+
+# Add editable k parameter
+if "k" not in st.session_state:
+    st.session_state["k"] = config.get('k', 5)
+
+st.session_state["k"] = st.sidebar.number_input(
+    "Documents to retrieve (k):",
+    min_value=1,
+    max_value=20,
+    value=st.session_state["k"],
+    help="Number of relevant documents to retrieve for context"
+)
 
 # Add editable system context
 st.sidebar.subheader("System Context")
@@ -68,7 +89,13 @@ if prompt:
     st.session_state[MESSAGES].append(Message(actor=USER, payload=prompt))
     st.chat_message(USER).write(prompt)
     # response: str = f"You wrote {prompt}"
-    response: str = run_query(prompt, vectordb, system_context=st.session_state["system_context"])
+    response: str = run_query(
+        prompt, 
+        vectordb, 
+        k=st.session_state["k"],
+        system_context=st.session_state["system_context"],
+        model_name=st.session_state["model_name"]
+    )
     st.session_state[MESSAGES].append(
         Message(actor=ASSISTANT, payload=response))
     st.chat_message(ASSISTANT).write(response)
