@@ -42,18 +42,20 @@ def return_vectordb():
     return vectordb
 
 
-def get_docs(query, vectordb, k=5):
+def get_docs(query, vectordb, k=None):
     """
     Get the documents for a given query.
 
     Inputs:
         query: query string
-        k: number of documents to return
+        k: number of documents to return (defaults to config value)
 
     Returns:
         docs_str: string of documents
     """
-
+    if k is None:
+        k = load_config().get('k', 5)
+    
     outs = vectordb.similarity_search_with_relevance_scores(query, k=k)
     docs, scores = zip(*outs)
 
@@ -71,18 +73,21 @@ def get_docs(query, vectordb, k=5):
 def run_query(
         query,
         vectordb,
-        k=5
+        k=None
 ):
     """
     Run a query and return the answer.
 
     Inputs:
         query: query string
-        k: number of documents to return
+        k: number of documents to return (defaults to config value)
 
     Returns:
         out_str: string of answer
     """
+    if k is None:
+        k = load_config().get('k', 5)
+    
     print(f"Searching for relevant documents (k={k})...")
     outs = vectordb.similarity_search_with_relevance_scores(query, k=k)
     docs, scores = zip(*outs)

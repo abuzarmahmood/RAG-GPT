@@ -3,5 +3,6 @@
     "vector_persist_dir": "/home/abuzarmahmood/projects/RAG-GPT/vector_store",
     "docs_output_dir": "/home/abuzarmahmood/projects/RAG-GPT/docs_output",
     "model_name": "gpt-4o-mini",
-    "system_context": "You are an AI assistant for answering questions about systems neuroscience, specifically taste processing. You are given the following extracted parts of a long document and a question. Provide a conversational answer. Always indicate your sources"
+    "system_context": "You are an AI assistant for answering questions about systems neuroscience, specifically taste processing. You are given the following extracted parts of a long document and a question. Provide a conversational answer. Always indicate your sources",
+    "k": 5
 }

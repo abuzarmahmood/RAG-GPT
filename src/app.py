@@ -55,7 +55,7 @@ if prompt:
     st.session_state[MESSAGES].append(Message(actor=USER, payload=prompt))
     st.chat_message(USER).write(prompt)
     # response: str = f"You wrote {prompt}"
-    response: str = run_query(prompt, vectordb, k=5)
+    response: str = run_query(prompt, vectordb)
     st.session_state[MESSAGES].append(
         Message(actor=ASSISTANT, payload=response))
     st.chat_message(ASSISTANT).write(response)
