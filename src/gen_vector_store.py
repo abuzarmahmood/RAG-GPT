@@ -71,11 +71,11 @@ def try_load(this_path):
 
 
 if not os.path.exists(docs_output_path):
-    print(f"Loading {len(file_list)} PDF files...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading {len(file_list)} PDF files...")
     docs_list = parallelize(file_list, try_load, num_of_processes=24)
     # Drop None
     docs_list = [doc for doc in docs_list if doc is not None]
-    print(f"Processing documents...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Processing documents...")
     # Flatten list
     docs_list = [item for sublist in docs_list for item in sublist]
     # Extract document source from each document
@@ -83,11 +83,11 @@ if not os.path.exists(docs_output_path):
     ## Count length of set of document source
     #len(set(doc_source))
     # Save docs
-    print(f"Saving {len(docs_list)} documents to {docs_output_path}...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Saving {len(docs_list)} documents to {docs_output_path}...")
     with open(docs_output_path, 'wb') as f:
         dump(docs_list, f)
 else:
-    print(f"Loading existing documents from {docs_output_path}...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading existing documents from {docs_output_path}...")
     docs_list = load(open(docs_output_path, 'rb')) 
 
 ############################################################
