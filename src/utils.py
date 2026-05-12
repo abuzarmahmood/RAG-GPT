@@ -3,6 +3,7 @@ This file contains the paths for the project and some helper functions.
 """
 
 import os
+import json
 from glob import glob
 
 
@@ -10,10 +11,15 @@ def return_paths():
     """
     Return paths for the project.
     """
-    docs_path = '/media/bigdata/projects/istyar/data/abu_zotero'
+    # Load configuration from config.json
+    config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+    
+    docs_path = config['docs_path']
     file_list = glob(os.path.join(docs_path, "*"))
-    vector_persist_dir = '/media/bigdata/projects/RAG-GPT/vector_store'
-    docs_output_dir = '/media/bigdata/projects/RAG-GPT/docs'
+    vector_persist_dir = config['vector_persist_dir']
+    docs_output_dir = config['docs_output_dir']
     docs_output_path = os.path.join(docs_output_dir, 'docs.pkl')
     return file_list, docs_output_path, docs_output_dir, vector_persist_dir
 

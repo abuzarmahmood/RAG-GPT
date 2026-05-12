@@ -1,0 +1,5 @@
+{
+    "docs_path": "/path/to/your/pdf/documents",
+    "vector_persist_dir": "/path/to/vector/store",
+    "docs_output_dir": "/path/to/docs/output"
+}

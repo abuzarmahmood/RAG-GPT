@@ -63,7 +63,11 @@ $env:OPENAI_API_KEY='your-api-key-here'
 
 ### Setup
 
-1. **Configure paths**: Edit `src/utils.py` to set your document paths:
+1. **Configure paths**: Copy and edit `config.json` to set your document paths:
+   ```bash
+   cp config.json config.json
+   ```
+   Then edit the file to set:
    - `docs_path`: Directory containing your PDF files
    - `vector_persist_dir`: Directory where the vector store will be saved
    - `docs_output_dir`: Directory for intermediate document processing
