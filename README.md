@@ -17,7 +17,7 @@ The [Examples](#examples) section illustrates outputs of RAG-GPT.
 ### Step 1: Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/abuzarmahmood/RAG-GPT.git
 cd RAG-GPT
 ```
 
