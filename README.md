@@ -1,11 +1,11 @@
 # RAG-GPT
 
-RAG-GPT is a Retrieval-Augmented Generation augmented LLM trained on a corpus of scientific articles relevant to the Katz Lab.
+RAG-GPT is a Retrieval-Augmented Generation augmented LLM trained on a corpus of scientific articles. 
 It is intended to be used both as a summarizer and synthesizer of knowledge as well as an LLM-augmented article search.
 
-Currently, KatzGPT is deployed as a Streamlit Chatbot App.
+Currently, RAG-GPT is deployed as a Streamlit Chatbot App.
 
-Below are a couple examples of KatzGPT in action. 
+The Examples section illustrates outputs of RAG-GPT. 
 
 ## Installation
 
