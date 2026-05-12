@@ -5,7 +5,24 @@ It is intended to be used both as a summarizer and synthesizer of knowledge as w
 
 Currently, RAG-GPT is deployed as a Streamlit Chatbot App.
 
-The [Examples](#examples) section illustrates outputs of RAG-GPT. 
+The [Examples](#examples) section illustrates outputs of RAG-GPT.
+
+## How It Works
+
+RAG-GPT follows a standard RAG (Retrieval-Augmented Generation) workflow:
+
+1. **Document Processing** (`gen_vector_store.py`): PDF documents are loaded, parsed, and split into chunks. Each chunk is converted into vector embeddings using OpenAI's embedding model and stored in a ChromaDB vector database.
+
+2. **Query Processing** (`rag_llm.py`): When a user asks a question, the system:
+   - Converts the query into a vector embedding
+   - Searches the vector database for the most relevant document chunks (using cosine similarity)
+   - Retrieves the top-k most relevant chunks along with their relevance scores
+
+3. **Response Generation** (`rag_llm.py`): The retrieved documents are combined with the user's query into a prompt, which is sent to the OpenAI LLM. The model generates a response based on the retrieved context.
+
+4. **Interactive Chat** (`app.py`): A Streamlit web interface provides an interactive chatbot experience, maintaining conversation history and displaying both the AI's response and the source documents used.
+
+The configuration file (`config.json`) controls key parameters like document paths, model selection, and system context.
 
 ## Installation
 
