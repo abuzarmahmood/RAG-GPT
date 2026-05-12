@@ -91,8 +91,8 @@ $env:OPENAI_API_KEY='your-api-key-here'
 
 ## Examples
 
-## Example 1
+### Example 1
 ![image](https://github.com/abuzarmahmood/RAG-GPT/assets/12436309/42f36d81-4318-4673-94ce-1429394ecc1b)
 
-## Example 2
+### Example 2
 ![image](https://github.com/abuzarmahmood/RAG-GPT/assets/12436309/f97f79c2-ee30-4bff-bfc2-4d4bf58f35a6)
