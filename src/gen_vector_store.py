@@ -70,7 +70,34 @@ def try_load(this_path):
     ) = return_paths()
 
 
-if not os.path.exists(docs_output_path):
+# Load existing docs if available
+if os.path.exists(docs_output_path):
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading existing documents from {docs_output_path}...")
+    docs_list = load(open(docs_output_path, 'rb'))
+    existing_sources = set(doc.metadata['source'] for doc in docs_list)
+    
+    # Check for new files
+    new_files = [f for f in file_list if f not in existing_sources]
+    
+    if new_files:
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(new_files)} new PDF files to process...")
+        new_docs_list = parallelize(new_files, try_load, num_of_processes=24)
+        # Drop None
+        new_docs_list = [doc for doc in new_docs_list if doc is not None]
+        # Flatten list
+        new_docs_list = [item for sublist in new_docs_list for item in sublist]
+        
+        # Combine with existing docs
+        docs_list.extend(new_docs_list)
+        
+        # Save updated docs
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Saving {len(docs_list)} documents to {docs_output_path}...")
+        with open(docs_output_path, 'wb') as f:
+            dump(docs_list, f)
+    else:
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] No new files to process")
+else:
+    # First time - load all files
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading {len(file_list)} PDF files...")
     docs_list = parallelize(file_list, try_load, num_of_processes=24)
     # Drop None
@@ -86,9 +113,6 @@ if not os.path.exists(docs_output_path):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Saving {len(docs_list)} documents to {docs_output_path}...")
     with open(docs_output_path, 'wb') as f:
         dump(docs_list, f)
-else:
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading existing documents from {docs_output_path}...")
-    docs_list = load(open(docs_output_path, 'rb')) 
 
 ############################################################
 # Generate Embeddings
