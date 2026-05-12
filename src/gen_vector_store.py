@@ -12,7 +12,7 @@ import os
 from tqdm import tqdm
 from joblib import Parallel, delayed 
 from pickle import dump, load
-from utils import return_paths
+from src.utils import return_paths
 
 from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
 from langchain.embeddings import OpenAIEmbeddings 

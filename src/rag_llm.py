@@ -10,7 +10,7 @@ import os
 from tqdm import tqdm
 from pickle import dump, load
 import numpy as np
-from utils import return_paths
+from src.utils import return_paths
 
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
