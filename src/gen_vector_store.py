@@ -113,5 +113,6 @@ for doc in tqdm(docs_list):
     
     # Only add if not already in database
     if doc_id not in existing_ids:
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Adding document: {doc_id}")
         vectordb.add_documents([doc], ids=[doc_id])
         existing_ids.add(doc_id)
