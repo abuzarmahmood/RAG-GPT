@@ -77,12 +77,20 @@ _, _, _, vector_persist_dir = return_paths()
 
 # Load vectordb once per process; track mtime and hash so we can detect updates.
 if "vectordb" not in st.session_state:
-    st.session_state["vectordb"] = return_vectordb()
-    st.session_state["vector_store_mtime"] = get_vector_store_mtime(vector_persist_dir)
-    st.session_state["vector_store_hash"] = calculate_vector_store_hash(vector_persist_dir)
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Application ready!")
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector store hash: {st.session_state['vector_store_hash']}")
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector store mtime: {datetime.fromtimestamp(st.session_state['vector_store_mtime']).strftime('%Y-%m-%d %H:%M:%S')}")
+    try:
+        st.session_state["vectordb"] = return_vectordb()
+        st.session_state["vector_store_mtime"] = get_vector_store_mtime(vector_persist_dir)
+        st.session_state["vector_store_hash"] = calculate_vector_store_hash(vector_persist_dir)
+        st.session_state["vectordb_error"] = None
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Application ready!")
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector store hash: {st.session_state['vector_store_hash']}")
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector store mtime: {datetime.fromtimestamp(st.session_state['vector_store_mtime']).strftime('%Y-%m-%d %H:%M:%S')}")
+    except Exception as e:
+        st.session_state["vectordb"] = None
+        st.session_state["vectordb_error"] = str(e)
+        st.session_state["vector_store_mtime"] = 0
+        st.session_state["vector_store_hash"] = "error"
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Error loading vector database: {e}")
 
 # Check whether the vector store has been updated since last load.
 current_mtime = get_vector_store_mtime(vector_persist_dir)
@@ -91,12 +99,25 @@ if current_mtime > st.session_state["vector_store_mtime"]:
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector store updated — reloading...")
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Old hash: {st.session_state['vector_store_hash']}")
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] New hash: {current_hash}")
-    st.session_state["vectordb"] = return_vectordb()
-    st.session_state["vector_store_mtime"] = current_mtime
-    st.session_state["vector_store_hash"] = current_hash
-    st.rerun()
+    try:
+        st.session_state["vectordb"] = return_vectordb()
+        st.session_state["vector_store_mtime"] = current_mtime
+        st.session_state["vector_store_hash"] = current_hash
+        st.session_state["vectordb_error"] = None
+        st.rerun()
+    except Exception as e:
+        st.session_state["vectordb"] = None
+        st.session_state["vectordb_error"] = str(e)
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Error reloading vector database: {e}")
 
 vectordb = st.session_state["vectordb"]
+
+# Display error if vector database failed to load
+if st.session_state.get("vectordb_error"):
+    st.error(f"⚠️ Vector database not available: {st.session_state['vectordb_error']}")
+    st.info("Please run the vector store generation script first to create the database.")
+    st.code("python src/gen_vector_store.py", language="bash")
+    st.stop()
 
 ############################################################
 # Run Chat
@@ -110,11 +131,15 @@ st.sidebar.title("Configuration")
 
 # Display vector store information
 st.sidebar.subheader("Vector Store Status")
-if "vector_store_hash" in st.session_state:
-    st.sidebar.text(f"Hash: {st.session_state['vector_store_hash'][:16]}...")
-if "vector_store_mtime" in st.session_state and st.session_state['vector_store_mtime'] > 0:
-    mtime_str = datetime.fromtimestamp(st.session_state['vector_store_mtime']).strftime('%Y-%m-%d %H:%M:%S')
-    st.sidebar.text(f"Last modified: {mtime_str}")
+if st.session_state.get("vectordb_error"):
+    st.sidebar.error("❌ Not loaded")
+else:
+    st.sidebar.success("✅ Loaded")
+    if "vector_store_hash" in st.session_state:
+        st.sidebar.text(f"Hash: {st.session_state['vector_store_hash'][:16]}...")
+    if "vector_store_mtime" in st.session_state and st.session_state['vector_store_mtime'] > 0:
+        mtime_str = datetime.fromtimestamp(st.session_state['vector_store_mtime']).strftime('%Y-%m-%d %H:%M:%S')
+        st.sidebar.text(f"Last modified: {mtime_str}")
 st.sidebar.markdown("---")
 
 # Add editable model name
