@@ -132,8 +132,9 @@ print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(existing_ids
 # Add documents one at a time, checking for duplicates
 print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Adding documents to vector database (skipping duplicates)...")
 for doc in tqdm(docs_list):
-    # Create a unique ID based on source and page
-    doc_id = f"{doc.metadata['source']}_{doc.metadata.get('page', 0)}"
+    # Create a unique ID based on filename (not full path) and page
+    filename = os.path.basename(doc.metadata['source'])
+    doc_id = f"{filename}_{doc.metadata.get('page', 0)}"
     
     # Only add if not already in database
     if doc_id not in existing_ids:
