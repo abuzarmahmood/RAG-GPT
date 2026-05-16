@@ -24,7 +24,11 @@ def return_paths():
     config = load_config()
     
     docs_path = config['docs_path']
+    # Search for PDFs in the docs_path directory and one level deeper
     file_list = glob(os.path.join(docs_path, "*"))
+    file_list.extend(glob(os.path.join(docs_path, "*", "*")))
+    # Filter to only include PDF files
+    file_list = [f for f in file_list if f.lower().endswith('.pdf')]
     vector_persist_dir = config['vector_persist_dir']
     docs_output_dir = config['docs_output_dir']
     docs_output_path = os.path.join(docs_output_dir, 'docs.pkl')

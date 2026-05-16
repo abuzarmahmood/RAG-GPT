@@ -74,10 +74,10 @@ def try_load(this_path):
 if os.path.exists(docs_output_path):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading existing documents from {docs_output_path}...")
     docs_list = load(open(docs_output_path, 'rb'))
-    existing_sources = set(doc.metadata['source'] for doc in docs_list)
+    existing_sources = set(os.path.basename(doc.metadata['source']) for doc in docs_list)
     
     # Check for new files
-    new_files = [f for f in file_list if f not in existing_sources]
+    new_files = [f for f in file_list if os.path.basename(f) not in existing_sources]
     
     if new_files:
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(new_files)} new PDF files to process...")
@@ -132,8 +132,9 @@ print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(existing_ids
 # Add documents one at a time, checking for duplicates
 print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Adding documents to vector database (skipping duplicates)...")
 for doc in tqdm(docs_list):
-    # Create a unique ID based on source and page
-    doc_id = f"{doc.metadata['source']}_{doc.metadata.get('page', 0)}"
+    # Create a unique ID based on filename (not full path) and page
+    filename = os.path.basename(doc.metadata['source'])
+    doc_id = f"{filename}_{doc.metadata.get('page', 0)}"
     
     # Only add if not already in database
     if doc_id not in existing_ids:
