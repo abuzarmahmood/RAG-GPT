@@ -74,10 +74,10 @@ def try_load(this_path):
 if os.path.exists(docs_output_path):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading existing documents from {docs_output_path}...")
     docs_list = load(open(docs_output_path, 'rb'))
-    existing_sources = set(doc.metadata['source'] for doc in docs_list)
+    existing_sources = set(os.path.basename(doc.metadata['source']) for doc in docs_list)
     
     # Check for new files
-    new_files = [f for f in file_list if f not in existing_sources]
+    new_files = [f for f in file_list if os.path.basename(f) not in existing_sources]
     
     if new_files:
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(new_files)} new PDF files to process...")
