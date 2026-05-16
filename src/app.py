@@ -110,9 +110,9 @@ st.sidebar.title("Configuration")
 
 # Display vector store information
 st.sidebar.subheader("Vector Store Status")
-if st.session_state.get("vector_store_hash"):
+if "vector_store_hash" in st.session_state:
     st.sidebar.text(f"Hash: {st.session_state['vector_store_hash'][:16]}...")
-if st.session_state.get("vector_store_mtime"):
+if "vector_store_mtime" in st.session_state and st.session_state['vector_store_mtime'] > 0:
     mtime_str = datetime.fromtimestamp(st.session_state['vector_store_mtime']).strftime('%Y-%m-%d %H:%M:%S')
     st.sidebar.text(f"Last modified: {mtime_str}")
 st.sidebar.markdown("---")
