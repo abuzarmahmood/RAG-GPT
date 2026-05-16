@@ -7,6 +7,7 @@ This is the main app file for the Streamlit app.
 ############################################################
 
 import os
+import hashlib
 from datetime import datetime
 import streamlit as st
 from dataclasses import dataclass
@@ -35,6 +36,38 @@ def get_vector_store_mtime(vector_persist_dir):
     return max(mtimes) if mtimes else 0
 
 
+def calculate_vector_store_hash(vector_persist_dir):
+    """
+    Calculate a hash of all files in the vector store directory.
+    Returns a hex digest string representing the state of the vector store.
+    """
+    if not os.path.exists(vector_persist_dir):
+        return "no_vector_store"
+    
+    hash_md5 = hashlib.md5()
+    
+    # Get all files sorted for consistent hashing
+    all_files = []
+    for root, _, files in os.walk(vector_persist_dir):
+        for fname in sorted(files):
+            fpath = os.path.join(root, fname)
+            all_files.append(fpath)
+    
+    # Hash each file's content
+    for fpath in sorted(all_files):
+        try:
+            with open(fpath, 'rb') as f:
+                # Hash file path (relative to vector_persist_dir) and content
+                rel_path = os.path.relpath(fpath, vector_persist_dir)
+                hash_md5.update(rel_path.encode())
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_md5.update(chunk)
+        except OSError:
+            pass
+    
+    return hash_md5.hexdigest()
+
+
 ############################################################
 # Get Vector Database 
 ############################################################
@@ -42,18 +75,25 @@ print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Initializing RAG-GPT ap
 
 _, _, _, vector_persist_dir = return_paths()
 
-# Load vectordb once per process; track mtime so we can detect updates.
+# Load vectordb once per process; track mtime and hash so we can detect updates.
 if "vectordb" not in st.session_state:
     st.session_state["vectordb"] = return_vectordb()
     st.session_state["vector_store_mtime"] = get_vector_store_mtime(vector_persist_dir)
+    st.session_state["vector_store_hash"] = calculate_vector_store_hash(vector_persist_dir)
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Application ready!")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector store hash: {st.session_state['vector_store_hash']}")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector store mtime: {datetime.fromtimestamp(st.session_state['vector_store_mtime']).strftime('%Y-%m-%d %H:%M:%S')}")
 
 # Check whether the vector store has been updated since last load.
 current_mtime = get_vector_store_mtime(vector_persist_dir)
 if current_mtime > st.session_state["vector_store_mtime"]:
+    current_hash = calculate_vector_store_hash(vector_persist_dir)
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector store updated — reloading...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Old hash: {st.session_state['vector_store_hash']}")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] New hash: {current_hash}")
     st.session_state["vectordb"] = return_vectordb()
     st.session_state["vector_store_mtime"] = current_mtime
+    st.session_state["vector_store_hash"] = current_hash
     st.rerun()
 
 vectordb = st.session_state["vectordb"]
@@ -67,6 +107,15 @@ config = load_config()
 
 # Display model information in sidebar
 st.sidebar.title("Configuration")
+
+# Display vector store information
+st.sidebar.subheader("Vector Store Status")
+if st.session_state.get("vector_store_hash"):
+    st.sidebar.text(f"Hash: {st.session_state['vector_store_hash'][:16]}...")
+if st.session_state.get("vector_store_mtime"):
+    mtime_str = datetime.fromtimestamp(st.session_state['vector_store_mtime']).strftime('%Y-%m-%d %H:%M:%S')
+    st.sidebar.text(f"Last modified: {mtime_str}")
+st.sidebar.markdown("---")
 
 # Add editable model name
 st.sidebar.subheader("Model Settings")
