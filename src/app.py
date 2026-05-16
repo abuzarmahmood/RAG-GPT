@@ -6,24 +6,62 @@ This is the main app file for the Streamlit app.
 ## Imports 
 ############################################################
 
+import os
+from datetime import datetime
 import streamlit as st
 from dataclasses import dataclass
 from rag_llm import run_query, return_vectordb
+from utils import load_config, return_paths
+
+############################################################
+# Vector Store Change Detection
+############################################################
+
+def get_vector_store_mtime(vector_persist_dir):
+    """
+    Return the most recent modification time across all files in the
+    vector store directory, or 0 if the directory does not exist.
+    """
+    if not os.path.exists(vector_persist_dir):
+        return 0
+    mtimes = []
+    for root, _, files in os.walk(vector_persist_dir):
+        for fname in files:
+            fpath = os.path.join(root, fname)
+            try:
+                mtimes.append(os.path.getmtime(fpath))
+            except OSError:
+                pass
+    return max(mtimes) if mtimes else 0
+
 
 ############################################################
 # Get Vector Database 
 ############################################################
-from datetime import datetime
 print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Initializing RAG-GPT application...")
-vectordb = return_vectordb()
-print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Application ready!")
+
+_, _, _, vector_persist_dir = return_paths()
+
+# Load vectordb once per process; track mtime so we can detect updates.
+if "vectordb" not in st.session_state:
+    st.session_state["vectordb"] = return_vectordb()
+    st.session_state["vector_store_mtime"] = get_vector_store_mtime(vector_persist_dir)
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Application ready!")
+
+# Check whether the vector store has been updated since last load.
+current_mtime = get_vector_store_mtime(vector_persist_dir)
+if current_mtime > st.session_state["vector_store_mtime"]:
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Vector store updated — reloading...")
+    st.session_state["vectordb"] = return_vectordb()
+    st.session_state["vector_store_mtime"] = current_mtime
+    st.rerun()
+
+vectordb = st.session_state["vectordb"]
 
 ############################################################
 # Run Chat
 ############################################################
 
-
-from utils import load_config
 
 config = load_config()
 
