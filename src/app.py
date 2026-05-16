@@ -138,3 +138,4 @@ if prompt:
     st.session_state[MESSAGES].append(
         Message(actor=ASSISTANT, payload=response))
     st.chat_message(ASSISTANT).write(response)
+    st.rerun()
