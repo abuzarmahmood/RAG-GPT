@@ -1,5 +1,5 @@
 {
-    "docs_path": "/home/abuzarmahmood/projects/RAG-GPT/docs",
+    "docs_path": "/home/abuzarmahmood/Zotero/storage",
     "vector_persist_dir": "/home/abuzarmahmood/projects/RAG-GPT/vector_store",
     "docs_output_dir": "/home/abuzarmahmood/projects/RAG-GPT/docs_output",
     "model_name": "gpt-4o-mini",
