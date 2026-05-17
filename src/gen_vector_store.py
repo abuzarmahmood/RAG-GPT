@@ -9,11 +9,13 @@ PDFs of scientific articles.
 
 from glob import glob
 import os
+import argparse
+import time
 from tqdm import tqdm
 from joblib import Parallel, delayed 
 from pickle import dump, load
 from datetime import datetime
-from utils import return_paths
+from utils import return_paths, load_config
 
 # from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
 from langchain_community.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
@@ -59,85 +61,127 @@ def try_load(this_path):
         return None
 
 ############################################################
-## Generate Docs
+## Parse Arguments
 ############################################################
 
-(
-    file_list, 
-    docs_output_path, 
-    docs_output_dir,
-    vector_persist_dir,
-    ) = return_paths()
+parser = argparse.ArgumentParser(description='Generate vector store from PDFs')
+parser.add_argument('--monitor', action='store_true', 
+                    help='Monitor the PDF directory for new files and process them continuously')
+args = parser.parse_args()
 
+############################################################
+## Load Configuration
+############################################################
 
-# Load existing docs if available
-if os.path.exists(docs_output_path):
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading existing documents from {docs_output_path}...")
-    docs_list = load(open(docs_output_path, 'rb'))
-    existing_sources = set(os.path.basename(doc.metadata['source']) for doc in docs_list)
-    
-    # Check for new files
-    new_files = [f for f in file_list if os.path.basename(f) not in existing_sources]
-    
-    if new_files:
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(new_files)} new PDF files to process...")
-        new_docs_list = parallelize(new_files, try_load, num_of_processes=24)
+config = load_config()
+monitor_timeout = config.get('monitor_timeout', 15)
+
+############################################################
+## Main Processing Function
+############################################################
+
+def process_documents():
+    """Process documents and update vector store."""
+    (
+        file_list, 
+        docs_output_path, 
+        docs_output_dir,
+        vector_persist_dir,
+        ) = return_paths()
+
+    # Load existing docs if available
+    if os.path.exists(docs_output_path):
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading existing documents from {docs_output_path}...")
+        docs_list = load(open(docs_output_path, 'rb'))
+        existing_sources = set(os.path.basename(doc.metadata['source']) for doc in docs_list)
+        
+        # Check for new files
+        new_files = [f for f in file_list if os.path.basename(f) not in existing_sources]
+        
+        if new_files:
+            print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(new_files)} new PDF files to process...")
+            new_docs_list = parallelize(new_files, try_load, num_of_processes=24)
+            # Drop None
+            new_docs_list = [doc for doc in new_docs_list if doc is not None]
+            # Flatten list
+            new_docs_list = [item for sublist in new_docs_list for item in sublist]
+            
+            # Combine with existing docs
+            docs_list.extend(new_docs_list)
+            
+            # Save updated docs
+            print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Saving {len(docs_list)} documents to {docs_output_path}...")
+            with open(docs_output_path, 'wb') as f:
+                dump(docs_list, f)
+        else:
+            print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] No new files to process")
+            return False  # No new files processed
+    else:
+        # First time - load all files
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading {len(file_list)} PDF files...")
+        docs_list = parallelize(file_list, try_load, num_of_processes=24)
         # Drop None
-        new_docs_list = [doc for doc in new_docs_list if doc is not None]
+        docs_list = [doc for doc in docs_list if doc is not None]
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Processing documents...")
         # Flatten list
-        new_docs_list = [item for sublist in new_docs_list for item in sublist]
-        
-        # Combine with existing docs
-        docs_list.extend(new_docs_list)
-        
-        # Save updated docs
+        docs_list = [item for sublist in docs_list for item in sublist]
+        # Extract document source from each document
+        doc_source = [doc.metadata['source'] for doc in docs_list]
+        ## Count length of set of document source
+        #len(set(doc_source))
+        # Save docs
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Saving {len(docs_list)} documents to {docs_output_path}...")
         with open(docs_output_path, 'wb') as f:
             dump(docs_list, f)
-    else:
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] No new files to process")
-else:
-    # First time - load all files
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Loading {len(file_list)} PDF files...")
-    docs_list = parallelize(file_list, try_load, num_of_processes=24)
-    # Drop None
-    docs_list = [doc for doc in docs_list if doc is not None]
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Processing documents...")
-    # Flatten list
-    docs_list = [item for sublist in docs_list for item in sublist]
-    # Extract document source from each document
-    doc_source = [doc.metadata['source'] for doc in docs_list]
-    ## Count length of set of document source
-    #len(set(doc_source))
-    # Save docs
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Saving {len(docs_list)} documents to {docs_output_path}...")
-    with open(docs_output_path, 'wb') as f:
-        dump(docs_list, f)
 
-############################################################
-# Generate Embeddings
-############################################################
+    ############################################################
+    # Generate Embeddings
+    ############################################################
 
-print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Initializing embeddings and vector database...")
-embeddings = OpenAIEmbeddings()
-vectordb = Chroma(embedding_function=embeddings, 
-                  persist_directory=vector_persist_dir)
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Initializing embeddings and vector database...")
+    embeddings = OpenAIEmbeddings()
+    vectordb = Chroma(embedding_function=embeddings, 
+                      persist_directory=vector_persist_dir)
 
-# Get existing document IDs to avoid duplicates
-print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking for existing documents in vector database...")
-existing_data = vectordb.get()
-existing_ids = set(existing_data['ids']) if existing_data['ids'] else set()
-print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(existing_ids)} existing documents in database")
+    # Get existing document IDs to avoid duplicates
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking for existing documents in vector database...")
+    existing_data = vectordb.get()
+    existing_ids = set(existing_data['ids']) if existing_data['ids'] else set()
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Found {len(existing_ids)} existing documents in database")
 
-# Add documents one at a time, checking for duplicates
-print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Adding documents to vector database (skipping duplicates)...")
-for doc in tqdm(docs_list):
-    # Create a unique ID based on filename (not full path) and page
-    filename = os.path.basename(doc.metadata['source'])
-    doc_id = f"{filename}_{doc.metadata.get('page', 0)}"
+    # Add documents one at a time, checking for duplicates
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Adding documents to vector database (skipping duplicates)...")
+    new_docs_added = 0
+    for doc in tqdm(docs_list):
+        # Create a unique ID based on filename (not full path) and page
+        filename = os.path.basename(doc.metadata['source'])
+        doc_id = f"{filename}_{doc.metadata.get('page', 0)}"
+        
+        # Only add if not already in database
+        if doc_id not in existing_ids:
+            print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Adding document: {doc_id}")
+            vectordb.add_documents([doc], ids=[doc_id])
+            existing_ids.add(doc_id)
+            new_docs_added += 1
     
-    # Only add if not already in database
-    if doc_id not in existing_ids:
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Adding document: {doc_id}")
-        vectordb.add_documents([doc], ids=[doc_id])
-        existing_ids.add(doc_id)
+    return new_docs_added > 0  # Return True if new documents were added
+
+############################################################
+## Main Execution
+############################################################
+
+if args.monitor:
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting monitor mode with {monitor_timeout}s timeout...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Press Ctrl+C to stop monitoring")
+    
+    try:
+        while True:
+            process_documents()
+            print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Waiting {monitor_timeout} seconds before next check...")
+            time.sleep(monitor_timeout)
+    except KeyboardInterrupt:
+        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Monitoring stopped by user")
+else:
+    # Run once
+    process_documents()
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Processing complete")
